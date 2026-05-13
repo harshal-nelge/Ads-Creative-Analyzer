@@ -1,3 +1,8 @@
+[project]
+name = "ads-creative-analyzer"
+version = "1.0.0"
+description = "Structured breakdown of ad creatives using AI"
+
 [tool.vercel]
 entrypoint = "api/index.py"
 
