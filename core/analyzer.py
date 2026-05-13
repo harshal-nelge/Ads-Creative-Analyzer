@@ -62,7 +62,7 @@ def _encode_image_bytes(raw: bytes, max_px: int = 1024) -> str:
 def _call_breakdown(client: Groq, b64: str) -> dict:
     """Single Groq vision call → structured breakdown dict."""
     response = client.chat.completions.create(
-        model="llama-3.2-90b-vision-preview",
+        model="meta-llama/llama-4-scout-17b-16e-instruct",
         response_format={"type": "json_object"},
         max_tokens=800,
         messages=[
@@ -92,7 +92,7 @@ def _call_scoring(client: Groq, breakdowns: list[dict]) -> dict:
     payload = json.dumps(clean, indent=2, ensure_ascii=False)
 
     response = client.chat.completions.create(
-        model="llama-3.2-90b-vision-preview",
+        model="meta-llama/llama-4-scout-17b-16e-instruct",
         response_format={"type": "json_object"},
         max_tokens=2000,
         messages=[
