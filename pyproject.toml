@@ -1,20 +1,3 @@
-[build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
-
-[project]
-name = "ads-creative-analyzer"
-version = "1.0.0"
-description = "Structured breakdown of ad creatives using AI"
-dependencies = [
-    "fastapi==0.136.1",
-    "groq==1.2.0",
-    "python-dotenv==1.2.2",
-    "pillow==12.2.0",
-    "uvicorn==0.46.0",
-    "pydantic==2.13.4",
-    "python-multipart==0.0.28",
-]
-
 [tool.vercel]
 entrypoint = "api/index.py"
+
