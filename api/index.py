@@ -22,8 +22,6 @@ from core.analyzer import (
 
 app = FastAPI(title="Ads Creative Analyzer")
 
-@app.get("/favicon.ico", include_in_schema=False)
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
