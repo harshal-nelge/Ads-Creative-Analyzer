@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: ads-creative-analyzer
+    runtime: python
+    pythonVersion: 3.11
+    plan: free
+    
+    # Build & start commands
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api.index:app --host 0.0.0.0 --port $PORT
+    
+    # Environment
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    
+    # Health check to prevent spin-down
+    healthCheckPath: /health
+    
+    # Auto-deploy on git push
+    autoDeployOnPush: true

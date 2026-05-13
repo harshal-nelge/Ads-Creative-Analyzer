@@ -44,6 +44,15 @@ async def root():
     return FileResponse(str(html))
 
 
+@app.get("/health")
+async def health():
+    """
+    Lightweight health check endpoint to prevent Render free tier shutdown.
+    Ping this every 2-3 minutes to keep the dyno awake.
+    """
+    return {"status": "ok"}
+
+
 @app.get("/api/status")
 async def status():
     """
