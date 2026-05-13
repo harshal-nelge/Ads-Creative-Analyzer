@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Ads Creative Analyzer</title>
+<style>
+/* ── Reset & tokens ───────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:      #f9f9f8;
+  --surface: #ffffff;
+  --border:  #e5e5e3;
+  --text:    #1a1a18;
+  --muted:   #6b6b68;
+  --accent:  #2563eb;
+  --green:   #16a34a;
+  --amber:   #d97706;
+  --red:     #dc2626;
+  --radius:  10px;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ── Layout ───────────────────────────────────────────────────── */
+.container { max-width: 1100px; margin: 0 auto; padding: 36px 20px; }
+
+header { margin-bottom: 28px; }
+header h1 { font-size: 22px; font-weight: 600; }
+header p  { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+/* ── Tabs ─────────────────────────────────────────────────────── */
+.tabs {
+  display: flex; gap: 2px;
+  background: var(--border);
+  border-radius: 9px; padding: 3px;
+  width: fit-content; margin-bottom: 24px;
+}
+.tab {
+  padding: 7px 22px; border-radius: 7px;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; border: none;
+  background: transparent; color: var(--muted);
+  transition: all .15s;
+}
+.tab.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+
+/* ── Buttons ──────────────────────────────────────────────────── */
+button {
+  padding: 8px 18px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface); color: var(--text);
+  cursor: pointer; font-size: 13px; font-weight: 500;
+  transition: background .15s;
+}
+button:hover  { background: #f0f0ef; }
+button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+button.primary:hover { background: #1d4ed8; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ── Info / error boxes ───────────────────────────────────────── */
+.info-box {
+  background: #f0fdf4; border: 1px solid #86efac;
+  border-radius: var(--radius); padding: 14px 18px;
+  font-size: 13px; color: var(--green); margin-bottom: 16px;
+}
+.error-box {
+  background: #fff1f2; border: 1px solid #fca5a5;
+  border-radius: var(--radius); padding: 14px 18px;
+  font-size: 13px; color: var(--red); margin: 16px 0;
+}
+.heuristic-box {
+  background: #eff6ff; border: 1px solid #bfdbfe;
+  border-radius: var(--radius); padding: 14px 18px;
+  font-size: 13px; margin-bottom: 20px;
+}
+.heuristic-box strong { color: var(--accent); }
+
+/* ── Upload zone ──────────────────────────────────────────────── */
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 44px 20px; text-align: center;
+  cursor: pointer; background: var(--surface);
+  transition: border-color .15s, background .15s;
+}
+.upload-zone:hover,
+.upload-zone.dragover { border-color: var(--accent); background: #eff6ff; }
+.upload-zone input    { display: none; }
+.upload-zone .icon    { font-size: 36px; margin-bottom: 10px; }
+.upload-zone h3       { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.upload-zone p        { font-size: 13px; color: var(--muted); }
+.browse               { color: var(--accent); text-decoration: underline; }
+
+/* ── Preview strip ────────────────────────────────────────────── */
+.preview-strip {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  margin: 16px 0; align-items: center;
+}
+.preview-thumb {
+  position: relative; width: 72px; height: 72px;
+  border-radius: 8px; overflow: hidden;
+  border: 1px solid var(--border); flex-shrink: 0;
+}
+.preview-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.preview-thumb .remove {
+  position: absolute; top: 3px; right: 3px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: rgba(0,0,0,.55); color: #fff;
+  font-size: 10px; display: flex;
+  align-items: center; justify-content: center;
+  cursor: pointer; line-height: 1;
+}
+.preview-count { font-size: 13px; color: var(--muted); }
+
+.btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 16px; }
+.warn-note { font-size: 12px; color: var(--muted); }
+
+/* ── Progress bar ─────────────────────────────────────────────── */
+.progress-bar {
+  height: 4px; background: var(--border);
+  border-radius: 2px; margin: 14px 0;
+  overflow: hidden; display: none;
+}
+.progress-fill {
+  height: 100%; background: var(--accent);
+  border-radius: 2px;
+  animation: indeterminate 1.4s infinite;
+}
+@keyframes indeterminate {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+
+/* ── Loading spinner ──────────────────────────────────────────── */
+#loading { display: none; text-align: center; padding: 60px 0; }
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  margin: 0 auto 14px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#loadingMsg { color: var(--muted); font-size: 13px; }
+
+/* ── Score badge ──────────────────────────────────────────────── */
+.score-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; border-radius: 50%;
+  font-size: 13px; font-weight: 700; flex-shrink: 0;
+}
+.score-high { background: #dcfce7; color: var(--green); }
+.score-mid  { background: #fef9c3; color: var(--amber); }
+.score-low  { background: #fee2e2; color: var(--red); }
+
+/* ── Ad card grid ─────────────────────────────────────────────── */
+.ad-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.ad-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.ad-card img {
+  width: 100%; height: 200px;
+  object-fit: cover; display: block;
+  background: #f0f0ef;
+}
+.ad-card-body { padding: 14px; }
+.ad-card-header {
+  display: flex; align-items: center;
+  gap: 10px; margin-bottom: 10px;
+}
+.ad-card-title  { font-size: 13px; font-weight: 600; flex: 1; word-break: break-all; }
+.ad-card-verdict { font-size: 12px; color: var(--muted); margin-bottom: 10px; font-style: italic; }
+
+.pill-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.pill {
+  font-size: 11px; padding: 2px 8px;
+  border-radius: 20px; border: 1px solid var(--border);
+  color: var(--muted); background: var(--bg);
+}
+.pill.top    { border-color: #86efac; color: var(--green); background: #f0fdf4; }
+.pill.bottom { border-color: #fca5a5; color: var(--red);   background: #fff1f2; }
+
+/* Score bars */
+.score-bar-row   { display: flex; align-items: center; gap: 8px; margin: 3px 0; font-size: 12px; }
+.score-bar-label { color: var(--muted); width: 120px; flex-shrink: 0; }
+.score-bar-track { flex: 1; height: 5px; background: var(--border); border-radius: 3px; }
+.score-bar-fill  { height: 100%; border-radius: 3px; background: var(--accent); }
+.score-bar-val   { width: 28px; text-align: right; color: var(--muted); }
+
+/* Breakdown details */
+details         { margin-top: 10px; }
+details summary { font-size: 12px; color: var(--accent); cursor: pointer; }
+.breakdown-table { width: 100%; margin-top: 8px; border-collapse: collapse; font-size: 12px; }
+.breakdown-table td { padding: 4px 6px; vertical-align: top; border-bottom: 1px solid var(--border); }
+.breakdown-table td:first-child { color: var(--muted); width: 42%; }
+
+/* ── Sections ─────────────────────────────────────────────────── */
+.section    { margin-top: 40px; }
+.section h2 {
+  font-size: 18px; font-weight: 600;
+  margin-bottom: 16px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.pattern-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px;
+  line-height: 1.8; font-size: 14px;
+}
+
+/* ── Ideas grid ───────────────────────────────────────────────── */
+.ideas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+.idea-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px;
+}
+.idea-card h3    { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.idea-card .fmt  {
+  font-size: 11px; background: #eff6ff; color: var(--accent);
+  border-radius: 20px; padding: 2px 8px;
+  display: inline-block; margin-bottom: 8px;
+}
+.idea-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <h1>Ads Creative Analyzer</h1>
+    <p>Structured breakdown · performance scoring · creative ideas — powered by Groq + Llama 3.2 Vision</p>
+  </header>
+
+  <!-- Tab switcher -->
+  <div class="tabs">
+    <button class="tab active" id="tabDemo"   onclick="switchTab('demo')">Demo brand</button>
+    <button class="tab"        id="tabUpload" onclick="switchTab('upload')">Upload your ads</button>
+  </div>
+
+  <!-- ── DEMO TAB ──────────────────────────────────────────────── -->
+  <div id="panelDemo">
+    <div class="info-box" id="demoBrandNote">
+      Showing pre-analyzed results for <strong>Mamaearth</strong> — active Meta ads.
+      Switch to "Upload your ads" to analyze any brand.
+    </div>
+    <button class="primary" onclick="loadDemo()">Load demo results</button>
+  </div>
+
+  <!-- ── UPLOAD TAB ─────────────────────────────────────────────── -->
+  <div id="panelUpload" style="display:none">
+
+    <!-- Drop zone -->
+    <div class="upload-zone" id="uploadZone"
+         ondragover="onDragOver(event)"
+         ondragleave="onDragLeave()"
+         ondrop="onDrop(event)"
+         onclick="document.getElementById('fileInput').click()">
+      <input type="file" id="fileInput" multiple
+             accept="image/png,image/jpeg,image/webp"
+             onchange="onFileSelect(event)"/>
+      <div class="icon">🖼️</div>
+      <h3>Drop ad screenshots here</h3>
+      <p>or <span class="browse">browse files</span></p>
+      <p style="margin-top:8px">PNG · JPG · WEBP &nbsp;·&nbsp; max 10 MB each &nbsp;·&nbsp; 2–15 images</p>
+    </div>
+
+    <!-- Thumbnail preview -->
+    <div class="preview-strip" id="previewStrip" style="display:none"></div>
+
+    <!-- Actions -->
+    <div class="btn-row">
+      <button class="primary" id="analyzeBtn" onclick="runUploadAnalysis()" disabled>
+        Analyze ads ↗
+      </button>
+      <button id="clearBtn" onclick="clearFiles()" style="display:none">Clear</button>
+      <span class="warn-note" id="fileCountNote"></span>
+    </div>
+
+    <div class="progress-bar" id="progressBar">
+      <div class="progress-fill"></div>
+    </div>
+
+    <p class="warn-note" style="margin-top:10px">
+      ⚡ Each image triggers a Groq vision call (~2 s). 12 images ≈ 30 s total.
+    </p>
+  </div>
+
+  <!-- ── Shared output area ─────────────────────────────────────── -->
+  <div id="errorBox"  class="error-box"   style="display:none"></div>
+  <div id="loading">
+    <div class="spinner"></div>
+    <p id="loadingMsg">Loading…</p>
+  </div>
+
+  <div id="content" style="display:none">
+    <div class="heuristic-box" style="margin-top:24px">
+      <strong>Scoring heuristic:</strong>
+      Hook clarity (3 pts) + CTA strength (2.5 pts) + Visual hierarchy (2 pts)
+      + Offer urgency (1.5 pts) + Emotional resonance (1 pt) = 10 pts max
+    </div>
+
+    <div class="section">
+      <h2>Creative breakdowns</h2>
+      <div class="ad-grid" id="adGrid"></div>
+    </div>
+
+    <div class="section">
+      <h2>What's driving the winners</h2>
+      <div class="pattern-box" id="patternBox"></div>
+    </div>
+
+    <div class="section">
+      <h2>Creative ideas to test next</h2>
+      <div class="ideas-grid" id="ideasGrid"></div>
+    </div>
+  </div>
+
+</div><!-- /.container -->
+
+<script>
+// ── Constants ─────────────────────────────────────────────────────────────────
+const MAX_SCORES = {
+  hook_clarity:       3,
+  cta_strength:       2.5,
+  visual_hierarchy:   2,
+  offer_urgency:      1.5,
+  emotional_resonance:1,
+};
+const LABELS = {
+  hook_clarity:       'Hook clarity',
+  cta_strength:       'CTA strength',
+  visual_hierarchy:   'Visual hierarchy',
+  offer_urgency:      'Offer urgency',
+  emotional_resonance:'Emotional resonance',
+};
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let selectedFiles  = [];
+let currentTab     = 'demo';
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function switchTab(name) {
+  currentTab = name;
+  document.getElementById('panelDemo').style.display   = name === 'demo'   ? '' : 'none';
+  document.getElementById('panelUpload').style.display = name === 'upload' ? '' : 'none';
+  document.getElementById('tabDemo').classList.toggle('active',   name === 'demo');
+  document.getElementById('tabUpload').classList.toggle('active', name === 'upload');
+  hideError();
+  document.getElementById('content').style.display = 'none';
+}
+
+// ── Demo ──────────────────────────────────────────────────────────────────────
+async function loadDemo() {
+  showLoading('Loading pre-analyzed results…');
+  try {
+    const r = await fetch('/api/analyze');
+    if (!r.ok) {
+      const e = await r.json().catch(() => ({ detail: r.statusText }));
+      throw new Error(e.detail || 'Server error');
+    }
+    render(await r.json(), false);
+  } catch (e) {
+    showError(e.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+// ── Drag-and-drop ─────────────────────────────────────────────────────────────
+function onDragOver(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.add('dragover');
+}
+function onDragLeave() {
+  document.getElementById('uploadZone').classList.remove('dragover');
+}
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('dragover');
+  addFiles(Array.from(e.dataTransfer.files));
+}
+function onFileSelect(e) {
+  addFiles(Array.from(e.target.files));
+  e.target.value = '';   // reset so same file can be re-picked
+}
+
+const ALLOWED_TYPES = new Set(['image/png','image/jpeg','image/jpg','image/webp']);
+
+function addFiles(incoming) {
+  for (const f of incoming) {
+    if (!ALLOWED_TYPES.has(f.type)) continue;
+    if (selectedFiles.length >= 15) break;
+    // deduplicate by name + size
+    if (selectedFiles.find(x => x.name === f.name && x.size === f.size)) continue;
+    selectedFiles.push(f);
+  }
+  renderPreviews();
+}
+
+function renderPreviews() {
+  const strip      = document.getElementById('previewStrip');
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const clearBtn   = document.getElementById('clearBtn');
+  const note       = document.getElementById('fileCountNote');
+
+  if (selectedFiles.length === 0) {
+    strip.style.display      = 'none';
+    clearBtn.style.display   = 'none';
+    analyzeBtn.disabled      = true;
+    note.textContent         = '';
+    return;
+  }
+
+  strip.style.display    = 'flex';
+  clearBtn.style.display = '';
+  analyzeBtn.disabled    = selectedFiles.length < 2;
+  note.textContent       = selectedFiles.length < 2
+    ? 'Add at least 2 images to analyze'
+    : `${selectedFiles.length} image${selectedFiles.length !== 1 ? 's' : ''} ready`;
+
+  strip.innerHTML = '';
+  selectedFiles.forEach((f, i) => {
+    const url = URL.createObjectURL(f);
+    strip.innerHTML += `
+      <div class="preview-thumb">
+        <img src="${url}" alt="${esc(f.name)}"/>
+        <div class="remove" onclick="removeFile(${i})">✕</div>
+      </div>`;
+  });
+}
+
+function removeFile(i) {
+  selectedFiles.splice(i, 1);
+  renderPreviews();
+}
+
+function clearFiles() {
+  selectedFiles = [];
+  renderPreviews();
+  document.getElementById('content').style.display = 'none';
+}
+
+// ── Upload & analyze ──────────────────────────────────────────────────────────
+async function runUploadAnalysis() {
+  if (selectedFiles.length < 2) return;
+
+  document.getElementById('analyzeBtn').disabled     = true;
+  document.getElementById('progressBar').style.display = 'block';
+  document.getElementById('content').style.display   = 'none';
+  hideError();
+  showLoading(`Analyzing ${selectedFiles.length} ads… (~${selectedFiles.length * 2} s)`);
+
+  const form = new FormData();
+  selectedFiles.forEach(f => form.append('files', f));
+
+  try {
+    const r = await fetch('/api/upload-and-analyze', { method: 'POST', body: form });
+    if (!r.ok) {
+      const e = await r.json().catch(() => ({ detail: r.statusText }));
+      throw new Error(e.detail || 'Server error');
+    }
+    render(await r.json(), true);   // true = use inline base64 images
+  } catch (e) {
+    showError(e.message);
+  } finally {
+    hideLoading();
+    document.getElementById('analyzeBtn').disabled       = false;
+    document.getElementById('progressBar').style.display = 'none';
+  }
+}
+
+// ── Render results ────────────────────────────────────────────────────────────
+function scoreClass(s) {
+  if (s >= 7) return 'score-high';
+  if (s >= 5) return 'score-mid';
+  return 'score-low';
+}
+
+function render(data, useBase64) {
+  const { breakdowns, report } = data;
+  const topSet  = new Set(report.top_performers  || []);
+  const botSet  = new Set(report.bottom_performers || []);
+  const scoreMap = {};
+  (report.scored_ads || []).forEach(s => { scoreMap[s.ad_id] = s; });
+
+  // ── Ad grid ────────────────────────────────────────────────
+  const grid = document.getElementById('adGrid');
+  grid.innerHTML = '';
+
+  breakdowns.forEach(bd => {
+    const scored = scoreMap[bd.ad_id] || {};
+    const score  = scored.score;
+    const sClass = (typeof score === 'number') ? scoreClass(score) : 'score-mid';
+    const sb     = scored.score_breakdown || {};
+    const isTop  = topSet.has(bd.ad_id);
+    const isBot  = botSet.has(bd.ad_id);
+
+    // Image: uploaded → inline base64; demo → static URL
+    const imgSrc = (useBase64 && bd.image_b64)
+      ? `data:image/jpeg;base64,${bd.image_b64}`
+      : (bd.image_path || `/ads/${bd.filename}`);
+
+    const barHTML = Object.entries(MAX_SCORES).map(([k, max]) => {
+      const val = sb[k] || 0;
+      const pct = Math.round((val / max) * 100);
+      return `<div class="score-bar-row">
+        <span class="score-bar-label">${LABELS[k]}</span>
+        <div class="score-bar-track">
+          <div class="score-bar-fill" style="width:${pct}%"></div>
+        </div>
+        <span class="score-bar-val">${val}</span>
+      </div>`;
+    }).join('');
+
+    const rows = [
+      ['Hook',     bd.hook],
+      ['CTA',      bd.cta],
+      ['Style',    bd.visual_style],
+      ['Colors',   bd.color_palette],
+      ['Offer',    bd.offer_type],
+      ['Tone',     bd.copy_tone],
+      ['Emotion',  bd.emotion_target],
+      ['Audience', bd.estimated_audience],
+    ]
+    .filter(([, v]) => v)
+    .map(([k, v]) => `<tr><td>${k}</td><td>${esc(String(v))}</td></tr>`)
+    .join('');
+
+    grid.innerHTML += `
+      <div class="ad-card">
+        <img src="${imgSrc}" alt="${esc(bd.filename || bd.ad_id)}" loading="lazy"
+             onerror="this.style.background='#f0f0ef';this.style.height='80px'"/>
+        <div class="ad-card-body">
+          <div class="ad-card-header">
+            <div class="score-badge ${sClass}">
+              ${typeof score === 'number' ? score.toFixed(1) : '?'}
+            </div>
+            <span class="ad-card-title">${esc(bd.filename || bd.ad_id)}</span>
+          </div>
+          <div class="pill-row">
+            ${isTop ? '<span class="pill top">Top performer</span>' : ''}
+            ${isBot ? '<span class="pill bottom">Underperformer</span>'  : ''}
+            ${bd.visual_style ? `<span class="pill">${esc(bd.visual_style)}</span>` : ''}
+            ${bd.copy_tone    ? `<span class="pill">${esc(bd.copy_tone)}</span>`    : ''}
+          </div>
+          ${scored.verdict
+              ? `<div class="ad-card-verdict">${esc(scored.verdict)}</div>`
+              : ''}
+          ${barHTML}
+          <details>
+            <summary>Full breakdown ↓</summary>
+            <table class="breakdown-table"><tbody>${rows}</tbody></table>
+          </details>
+        </div>
+      </div>`;
+  });
+
+  // ── Pattern analysis ───────────────────────────────────────
+  document.getElementById('patternBox').textContent =
+    report.pattern_analysis || 'No pattern analysis available.';
+
+  // ── Creative ideas ─────────────────────────────────────────
+  const ideasGrid = document.getElementById('ideasGrid');
+  ideasGrid.innerHTML = '';
+  (report.creative_ideas || []).forEach(idea => {
+    ideasGrid.innerHTML += `
+      <div class="idea-card">
+        <h3>${esc(idea.title)}</h3>
+        <span class="fmt">${esc(idea.format || '')}</span>
+        <p>${esc(idea.rationale)}</p>
+      </div>`;
+  });
+
+  document.getElementById('content').style.display = 'block';
+  document.getElementById('content').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function showLoading(msg) {
+  document.getElementById('loadingMsg').textContent = msg;
+  document.getElementById('loading').style.display  = 'block';
+}
+function hideLoading() {
+  document.getElementById('loading').style.display = 'none';
+}
+function showError(msg) {
+  const el = document.getElementById('errorBox');
+  el.textContent    = '⚠ ' + msg;
+  el.style.display  = 'block';
+}
+function hideError() {
+  document.getElementById('errorBox').style.display = 'none';
+}
+function esc(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+loadDemo();   // auto-load demo on page open
+</script>
+</body>
+</html>
