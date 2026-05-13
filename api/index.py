@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from fastapi import FastAPI, HTTPException, Query, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from typing import List
 
 from core.analyzer import (
@@ -30,7 +31,10 @@ app.add_middleware(
 
 PUBLIC_DIR = Path(__file__).parent.parent / "public"
 
-# Note: Vercel auto-serves public/ads/ from CDN; no mount needed
+# Mount static files for Render (and local dev)
+# Vercel auto-serves public/ads/ from CDN, so this mount is only used on Render
+if (PUBLIC_DIR / "ads").exists():
+    app.mount("/ads", StaticFiles(directory=str(PUBLIC_DIR / "ads")), name="ads")
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
