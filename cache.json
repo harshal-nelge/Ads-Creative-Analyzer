@@ -1,0 +1,150 @@
+{
+  "ad_1": {
+    "hook": "Exceptional Without Exception",
+    "cta": "Starting at ₹54,999*",
+    "visual_style": "product-focus",
+    "color_palette": "black + white + green + gray",
+    "faces_present": false,
+    "product_visible": true,
+    "offer_type": "bundle",
+    "copy_tone": "direct-response",
+    "emotion_target": "curiosity",
+    "headline_strength": 4,
+    "visual_hierarchy_clear": true,
+    "estimated_audience": "Tech-savvy individuals looking for a new tablet.",
+    "ad_id": "ad_1",
+    "filename": "ad_1.jpg",
+    "image_path": "/ads/ad_1.jpg"
+  },
+  "ad_2": {
+    "hook": "Power meets portability in perfect balance",
+    "cta": "Starting at ₹54,999*",
+    "visual_style": "product-focus",
+    "color_palette": "black + white + green",
+    "faces_present": false,
+    "product_visible": true,
+    "offer_type": "bundle",
+    "copy_tone": "direct-response",
+    "emotion_target": "curiosity",
+    "headline_strength": 4,
+    "visual_hierarchy_clear": true,
+    "estimated_audience": "Tech-savvy individuals looking for a portable and powerful tablet.",
+    "ad_id": "ad_2",
+    "filename": "ad_2.jpg",
+    "image_path": "/ads/ad_2.jpg"
+  },
+  "ad_3": {
+    "hook": "Pay only ₹19 + EMI",
+    "cta": "Buy Now",
+    "visual_style": "product-focus",
+    "color_palette": "dark blue + white + green + yellow",
+    "faces_present": false,
+    "product_visible": true,
+    "offer_type": "EMI",
+    "copy_tone": "direct-response",
+    "emotion_target": "excitement and affordability",
+    "headline_strength": 4,
+    "visual_hierarchy_clear": true,
+    "estimated_audience": "Tech-savvy Indians looking for affordable premium audio products",
+    "ad_id": "ad_3",
+    "filename": "ad_3.jpg",
+    "image_path": "/ads/ad_3.jpg"
+  },
+  "ad_4": {
+    "hook": "Limited period offer on OnePlus Nord CE6 Lite",
+    "cta": "Buy now with offers",
+    "visual_style": "product-focus",
+    "color_palette": "black + green + white",
+    "faces_present": false,
+    "product_visible": true,
+    "offer_type": "discount",
+    "copy_tone": "direct-response",
+    "emotion_target": "excitement and urgency",
+    "headline_strength": 4,
+    "visual_hierarchy_clear": true,
+    "estimated_audience": "Tech-savvy individuals looking for a new smartphone",
+    "ad_id": "ad_4",
+    "filename": "ad_4.jpg",
+    "image_path": "/ads/ad_4.jpg"
+  },
+  "__report__": {
+    "scored_ads": [
+      {
+        "ad_id": "ad_1",
+        "score": 8.0,
+        "score_breakdown": {
+          "hook_clarity": 2.5,
+          "cta_strength": 2.0,
+          "visual_hierarchy": 2.0,
+          "offer_urgency": 1.0,
+          "emotional_resonance": 0.5
+        },
+        "verdict": "The ad scores well on hook clarity and visual hierarchy but could improve on emotional resonance."
+      },
+      {
+        "ad_id": "ad_2",
+        "score": 8.0,
+        "score_breakdown": {
+          "hook_clarity": 2.5,
+          "cta_strength": 2.0,
+          "visual_hierarchy": 2.0,
+          "offer_urgency": 1.0,
+          "emotional_resonance": 0.5
+        },
+        "verdict": "The ad scores well on hook clarity and visual hierarchy but could improve on emotional resonance."
+      },
+      {
+        "ad_id": "ad_3",
+        "score": 9.0,
+        "score_breakdown": {
+          "hook_clarity": 3.0,
+          "cta_strength": 2.5,
+          "visual_hierarchy": 2.0,
+          "offer_urgency": 1.5,
+          "emotional_resonance": 1.0
+        },
+        "verdict": "The ad excels on hook clarity, CTA strength, and offer urgency, making it a top performer."
+      },
+      {
+        "ad_id": "ad_4",
+        "score": 8.5,
+        "score_breakdown": {
+          "hook_clarity": 2.5,
+          "cta_strength": 2.5,
+          "visual_hierarchy": 2.0,
+          "offer_urgency": 1.5,
+          "emotional_resonance": 1.0
+        },
+        "verdict": "The ad scores well on CTA strength and offer urgency, but could improve on hook clarity."
+      }
+    ],
+    "top_performers": [
+      "ad_3",
+      "ad_4"
+    ],
+    "bottom_performers": [],
+    "pattern_analysis": "Top-performing ads for this brand tend to have clear and punchy hooks, strong CTAs, and a sense of urgency. They also effectively use visual hierarchy to communicate their message. A key area for improvement is increasing emotional resonance across ads.",
+    "creative_ideas": [
+      {
+        "title": "Affordability-focused campaign",
+        "format": "Carousel",
+        "rationale": "Create a carousel ad highlighting different affordable payment options, similar to ad_3's EMI offer."
+      },
+      {
+        "title": "Product showcase",
+        "format": "Video",
+        "rationale": "Develop a short video ad showcasing the features and benefits of the product, similar to ad_1 and ad_2's product-focus visual style."
+      },
+      {
+        "title": "Limited-time offer campaign",
+        "format": "Static image",
+        "rationale": "Design a static image ad creating a sense of urgency with a limited-time offer, similar to ad_4's limited period offer."
+      },
+      {
+        "title": "Emotional storytelling",
+        "format": "Video",
+        "rationale": "Create a video ad telling an emotional story that resonates with the target audience, increasing emotional resonance."
+      }
+    ]
+  }
+}
