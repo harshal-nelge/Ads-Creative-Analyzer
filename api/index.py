@@ -38,7 +38,7 @@ if (PUBLIC_DIR / "ads").exists():
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
-
+@app.head("/")
 @app.get("/")
 async def root():
     """Serve the frontend SPA."""
@@ -49,6 +49,7 @@ async def root():
 
 
 @app.get("/health")
+@app.head("/health")
 async def health():
     """
     Lightweight health check endpoint to prevent Render free tier shutdown.
